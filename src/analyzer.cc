@@ -112,29 +112,19 @@ int Analyzer::flowThread()
             macIpInfo.dstPort = std::to_string(m_filter.getDestPort());     // 获取目标端口号
             macIpInfo.uri = m_filter.getURI();                              // 获取URI            
             addMacIpInfo(m_filter.getOnlyFlag(), macIpInfo);                // 添加MAC/IP信息
-            LOG_INFO("TCP连接建立 唯一标识: %s, 反向唯一标识: %s", m_filter.getOnlyFlag().c_str(), m_filter.getReverseOnlyFlag().c_str()); // 打印日志
+            LOG_INFO("TCP连接建立 唯一标识: %s", m_filter.getOnlyFlag().c_str()); // 打印日志
         } else if (m_filter.isTcpHandleClose()) {   // 检测到TCP挥手包
 #if 1
-            if(getMacIpInfo(m_filter.getOnlyFlag()).isVPN) {
+            if(getMacIpInfo(m_filter.getOnlyFlag()).isVPN || getMacIpInfo(m_filter.getReverseOnlyFlag()).isVPN) {
                 LOG_INFO("VPN连接关闭 接收:%d, 发送:%d, 唯一标识:%s", 
                     getIpCount(m_filter.getOnlyFlag()), getIpCount(m_filter.getReverseOnlyFlag()), m_filter.getOnlyFlag().c_str());    // 打印日志
-            } else {
+            } 
+            else {
                 LOG_INFO("TCP连接关闭 接收:%d, 发送:%d, 唯一标识:%s", 
                     getIpCount(m_filter.getOnlyFlag()), getIpCount(m_filter.getReverseOnlyFlag()), m_filter.getOnlyFlag().c_str());    // 打印日志
             }
-            showMacIpInfo(m_filter.getOnlyFlag());   // 打印日志
             delIpCount(m_filter.getOnlyFlag());             // 删除访问次数
             delMacIpInfo(m_filter.getOnlyFlag());           // 删除MAC/IP信息
-#else 
-            //
-            if(getMacIpInfo(m_filter.getReverseOnlyFlag()).isVPN) {
-                LOG_INFO("VPN连接关闭 接收:%d, 发送:%d, 唯一标识:%s", 
-                    getIpCount(m_filter.getReverseOnlyFlag()), getIpCount(m_filter.getOnlyFlag()), m_filter.getReverseOnlyFlag().c_str());    // 打印日志
-            } else {
-                LOG_INFO("TCP连接关闭 接收:%d, 发送:%d, 唯一标识:%s", 
-                    getIpCount(m_filter.getReverseOnlyFlag()), getIpCount(m_filter.getOnlyFlag()), m_filter.getReverseOnlyFlag().c_str());    // 打印日志
-            }
-            showMacIpInfo(m_filter.getReverseOnlyFlag());   // 打印日志
             delIpCount(m_filter.getReverseOnlyFlag());      // 删除访问次数
             delMacIpInfo(m_filter.getReverseOnlyFlag());    // 删除MAC/IP信息
 #endif 
@@ -194,10 +184,15 @@ void Analyzer::addMacIpInfo(const std::string &onlyFlag, const MacIpInfo &macIpI
     m_macIpMap[onlyFlag] = macIpInfo;
 }
 
-void Analyzer::delMacIpInfo(const std::string &onlyFlag)
+bool Analyzer::delMacIpInfo(const std::string &onlyFlag)
 {
     if(onlyFlag.empty()) return; // 空字符串不处理(可能是TCP握手包，不需要记录访问次数)
+    MacIpMap::iterator it = m_macIpMap.find(onlyFlag);
+    if (it == m_macIpMap.end()) {
+        return false;
+    }
     m_macIpMap.erase(onlyFlag);
+    return true;
 }
 
 void Analyzer::setIsVPN(const std::string &onlyFlag)
@@ -232,10 +227,15 @@ void Analyzer::addIpCount(const std::string &onlyFlag)
     }
 }
 
-void Analyzer::delIpCount(const std::string &onlyFlag)
+bool Analyzer::delIpCount(const std::string &onlyFlag)
 {
     if(onlyFlag.empty()) return; // 空字符串不处理(可能是TCP握手包，不需要记录访问次数)
+    IpCountMap::iterator it = m_ipCountMap.find(onlyFlag);
+    if (it != m_ipCountMap.end()) {
+        return false;
+    }
     m_ipCountMap.erase(onlyFlag);
+    return true;
 }
 
 void Analyzer::clearScreen()

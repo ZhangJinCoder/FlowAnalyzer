@@ -40,13 +40,13 @@ public:
 protected:
     // 添加、删除MAC/IP信息到映射表
     void addMacIpInfo(const std::string& onlyFlag, const MacIpInfo& macIpInfo);
-    void delMacIpInfo(const std::string& onlyFlag);
+    bool delMacIpInfo(const std::string& onlyFlag);
     void setIsVPN(const std::string& onlyFlag);         // 设置为VPN流量
     void showMacIpInfo(const std::string& onlyFlag);    // 显示MAC/IP信息
 
     // 添加、删除访问次数到映射表
     void addIpCount(const std::string& onlyFlag);
-    void delIpCount(const std::string& onlyFlag);
+    bool delIpCount(const std::string& onlyFlag);
 
 public:
     void clearScreen(); // 清屏
