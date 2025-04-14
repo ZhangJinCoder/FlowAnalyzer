@@ -29,12 +29,21 @@ public:
     unsigned short getSourcePort(); // 获取源端口号
     unsigned short getDestPort();   // 获取目标端口号
 
+public:
+    void setLocalMac(std::string localMac) {    // 设置本地MAC地址
+        m_localMac = localMac;
+    }
+    void setLocalIp(std::string localIP) {     // 设置本地IP地址
+        m_localIP = localIP;
+    }
 protected:
     std::string trimRight(const std::string& str);
 
 private:
     std::string m_srcMac;   // 源MAC地址
     std::string m_dstMac;   // 目标MAC地址
+    std::string m_localMac; // 本地MAC地址
+    std::string m_localIP;  // 本地IP地址
     IPHeader m_ipHeader;    // IP header
 };
 

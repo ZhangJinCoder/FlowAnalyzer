@@ -17,10 +17,15 @@ bool Filter::parse(unsigned char *buffer, unsigned int length)
     struct ethhdr* eth = (struct ethhdr*)buffer;
     // 输出MAC地址 60:db:15:73:46:01
     char srcMac[32] = {0}, dstMac[32] = {0};
-    snprintf(srcMac, 32, "%02x:%02x:%02x:%02x:%02x:%02x\n", eth->h_source[0], eth->h_source[1], eth->h_source[2], eth->h_source[3], eth->h_source[4], eth->h_source[5]);
-    snprintf(dstMac, 32, "%02x:%02x:%02x:%02x:%02x:%02x\n", eth->h_dest[0], eth->h_dest[1], eth->h_dest[2], eth->h_dest[3], eth->h_dest[4], eth->h_dest[5]);
-    m_srcMac = trimRight(srcMac);
-    m_dstMac = trimRight(dstMac);
+    snprintf(srcMac, 32, "%02x:%02x:%02x:%02x:%02x:%02x", eth->h_source[0], eth->h_source[1], eth->h_source[2], eth->h_source[3], eth->h_source[4], eth->h_source[5]);
+    snprintf(dstMac, 32, "%02x:%02x:%02x:%02x:%02x:%02x", eth->h_dest[0], eth->h_dest[1], eth->h_dest[2], eth->h_dest[3], eth->h_dest[4], eth->h_dest[5]);
+    m_srcMac = std::string(srcMac);
+    m_dstMac = std::string(dstMac);
+    // mac地址判断
+    if(m_dstMac != m_localMac) {
+        // LOG_DEBUG("目标MAC地址[%s]不是本地MAC地址[%s]", m_dstMac.c_str(), m_localMac.c_str());
+        return false;
+    }
     // ETH_P_IP: 0x0800, ETH_P_IPV6: 0x86dd, ETH_P_ARP: 0x0806
     if (ntohs(eth->h_proto) == ETH_P_IP || ntohs(eth->h_proto) == ETH_P_IPV6) { 
         // 跳过以太网头部(14字节)后才是IP头

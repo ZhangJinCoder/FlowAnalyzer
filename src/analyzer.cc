@@ -61,6 +61,8 @@ int Analyzer::flowThread()
     // 获取网络接口索引
     struct ifreq ifr;
     strncpy(ifr.ifr_name, m_interface.name.c_str(), IFNAMSIZ);
+    m_filter.setLocalMac(m_interface.macAddress); // 设置本地MAC地址
+    m_filter.setLocalIp(m_interface.ipAddress);   // 设置本地IP地址
     
     // 创建原始套接字
     int sockfd = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
@@ -88,14 +90,6 @@ int Analyzer::flowThread()
     }
 #endif 
 
-    // 获取本机网卡的 MAC 地址
-    // struct ifreq ifr_mac;
-    // strncpy(ifr_mac.ifr_name, m_interface.name.c_str(), IFNAMSIZ);
-    // if (ioctl(sockfd, SIOCGIFHWADDR, &ifr_mac) < 0) {
-    //     perror("ioctl SIOCGIFHWADDR");
-    //     return 1;
-    // }
-
     // 修改绑定地址结构
     struct sockaddr_ll sll;
     memset(&sll, 0, sizeof(sll));
@@ -116,14 +110,6 @@ int Analyzer::flowThread()
             perror("recvfrom");
             break;
         }
-        // 解析以太网帧头
-        // struct ethhdr* eth = (struct ethhdr *)buffer;
-        // 检查目的地址是否是本机网卡的 MAC 地址
-        // if (memcmp(eth->h_dest, ifr_mac.ifr_hwaddr.sa_data, ETH_ALEN) != 0) {
-        //     // LOG_DEBUG("不是接收的流量，跳过");
-        //     continue;
-        // } 
-        // std::cout << "Received " << bytes_received << " bytes" << std::endl;
         bool ret = m_filter.parse((unsigned char*)buffer, bytes_received);
         if(!ret) { // 解析失败，跳过
             continue;
@@ -143,6 +129,7 @@ int Analyzer::flowThread()
             macIpInfo.uri = m_filter.getURI();                              // 获取URI            
             addMacIpInfo(m_filter.getOnlyFlag(), macIpInfo);                // 添加MAC/IP信息
             LOG_INFO("TCP连接建立 唯一标识: %s", m_filter.getOnlyFlag().c_str()); // 打印日志
+            continue;
         } else if (m_filter.isTcpHandleClose()) {   // 检测到TCP挥手包
 #if 1
             if(getMacIpInfo(m_filter.getOnlyFlag()).isVPN || getMacIpInfo(m_filter.getReverseOnlyFlag()).isVPN) {
@@ -155,6 +142,7 @@ int Analyzer::flowThread()
             }
             delIpCount(m_filter.getOnlyFlag());             // 删除访问次数
             delMacIpInfo(m_filter.getOnlyFlag());           // 删除MAC/IP信息
+            continue;
 #endif 
         } 
         if(bytes_received == 63 && std::string(buffer + 54, 9) == std::string("vpnclient")) {
@@ -225,11 +213,6 @@ void Analyzer::addMacIpInfo(const std::string &onlyFlag, const MacIpInfo &macIpI
 bool Analyzer::delMacIpInfo(const std::string &onlyFlag)
 {
     if(onlyFlag.empty()) return false; // 空字符串不处理(可能是TCP握手包，不需要记录访问次数)
-    MacIpMap::iterator it = m_macIpMap.find(onlyFlag);
-    if (it == m_macIpMap.end()) {
-        LOG_ERROR("删除MAC/IP信息失败 唯一标识: %s", onlyFlag.c_str());
-        return false;
-    }
     LOG_INFO("删除MAC/IP信息成功 唯一标识: %s", onlyFlag.c_str());
     m_macIpMap.erase(onlyFlag);
     return true;
@@ -274,11 +257,6 @@ void Analyzer::updateIpCount(const std::string &onlyFlag)
 bool Analyzer::delIpCount(const std::string &onlyFlag)
 {
     if(onlyFlag.empty()) return false; // 空字符串不处理(可能是TCP握手包，不需要记录访问次数)
-    IpCountMap::iterator it = m_ipCountMap.find(onlyFlag);
-    if (it != m_ipCountMap.end()) {
-        LOG_ERROR("删除访问次数失败 唯一标识: %s", onlyFlag.c_str());
-        return false;
-    }
     LOG_INFO("删除访问次数成功 唯一标识: %s", onlyFlag.c_str());
     m_ipCountMap.erase(onlyFlag);
     return true;
