@@ -40,8 +40,6 @@ public:
     MacIpInfo getMacIpInfo(const std::string& onlyFlag);    // 获取MAC/IP信息
     unsigned int getIpCount(const std::string& onlyFlag);   // 获取访问次数
 
-    // 打印MAC/IP信息和访问次数
-    void printMacIpInfo();
     void printIpCount();
 
 protected:

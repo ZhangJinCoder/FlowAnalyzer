@@ -10,7 +10,6 @@ int main() {
     // 等待分析器结束
     while (true) {
         Analyzer::getInstance()->clearScreen();
-        // Analyzer::getInstance()->printMacIpInfo();  // 打印MAC/IP信息
         Analyzer::getInstance()->printIpCount();    // 打印访问次数
         sleep(1);
     }

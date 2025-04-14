@@ -129,7 +129,6 @@ int Analyzer::flowThread()
             macIpInfo.uri = m_filter.getURI();                              // 获取URI            
             addMacIpInfo(m_filter.getOnlyFlag(), macIpInfo);                // 添加MAC/IP信息
             LOG_INFO("TCP连接建立 唯一标识: %s", m_filter.getOnlyFlag().c_str()); // 打印日志
-            continue;
         } else if (m_filter.isTcpHandleClose()) {   // 检测到TCP挥手包
 #if 1
             if(getMacIpInfo(m_filter.getOnlyFlag()).isVPN || getMacIpInfo(m_filter.getReverseOnlyFlag()).isVPN) {
@@ -142,13 +141,13 @@ int Analyzer::flowThread()
             }
             delIpCount(m_filter.getOnlyFlag());             // 删除访问次数
             delMacIpInfo(m_filter.getOnlyFlag());           // 删除MAC/IP信息
-            continue;
 #endif 
-        } 
-        if(bytes_received == 63 && std::string(buffer + 54, 9) == std::string("vpnclient")) {
-            setIsVPN(m_filter.getOnlyFlag()); // 设置为VPN流量
+        } else {
+            if(bytes_received == 63 && std::string(buffer + 54, 9) == std::string("vpnclient")) {
+                setIsVPN(m_filter.getOnlyFlag()); // 设置为VPN流量
+            }
+            updateIpCount(m_filter.getOnlyFlag()); // 增加访问次数
         }
-        updateIpCount(m_filter.getOnlyFlag()); // 增加访问次数
     }
 
     close(sockfd);
@@ -173,13 +172,6 @@ unsigned int Analyzer::getIpCount(const std::string &onlyFlag)
         return it->second; 
     }
     return 0;
-}
-
-void Analyzer::printMacIpInfo()
-{
-    for (MacIpMap::iterator it = m_macIpMap.begin(); it != m_macIpMap.end(); ++it) {
-        std::cout << it->first << " " << it->second.srcMac << std::endl;
-    }
 }
 
 void Analyzer::printIpCount()
