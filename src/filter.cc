@@ -24,7 +24,7 @@ bool Filter::parse(unsigned char *buffer, unsigned int length)
     // mac地址判断
 
     if((m_dstMac != m_localMac) && (m_srcMac != m_localMac)) {
-        LOG_DEBUG("源MAC地址[%s]或目标MAC地址[%s]不是本地MAC地址[%s]", m_srcMac.c_str(), m_dstMac.c_str(), m_localMac.c_str());
+        LOG_DEBUG("源MAC地址[%s]、目标MAC地址[%s]均不是本地MAC地址[%s]", m_srcMac.c_str(), m_dstMac.c_str(), m_localMac.c_str());
         return false;
     }
     // ETH_P_IP: 0x0800, ETH_P_IPV6: 0x86dd, ETH_P_ARP: 0x0806
