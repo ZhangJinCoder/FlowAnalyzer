@@ -173,20 +173,20 @@ unsigned int Analyzer::getIpCount(const std::string &onlyFlag)
     }
     return 0;
 }
-
+// TCP_fec0:32:59:0:5240:ca02:3dbb:4244:59022_2a03:2880:f12d:83:face:b00c:0:25de:4431
 void Analyzer::printIpCount()
 {
     std::cout << "网卡:[" << m_interface.name  << "] IP地址:[" << m_interface.ipAddress << "] MAC地址:[" << m_interface.macAddress << "]" << std::endl;
-    std::cout << "------------------------------------------------------------------------------" << std::endl;
-    std::cout << std::left << std::setw(64) << "唯一标识" 
+    std::cout << "--------------------------------------------------------------------------------------------------------------------" << std::endl;
+    std::cout << std::left << std::setw(94) << "唯一标识" 
               << std::left << std::setw(12) << "访问次数" << std::endl;
-    std::cout << "------------------------------------------------------------------------------" << std::endl;
+    std::cout << "--------------------------------------------------------------------------------------------------------------------" << std::endl;
     for (IpCountMap::iterator it = m_ipCountMap.begin(); it!= m_ipCountMap.end(); ++it) {
         if(m_macIpMap[it->first].isVPN) {
-            std::cout << std::left << std::setw(60) << (it->first + " [VPN]")
+            std::cout << std::left << std::setw(90) << (it->first + " [VPN]")
                       << std::left << std::setw(12) << it->second << std::endl;
         } else {
-            std::cout << std::left << std::setw(60) << it->first
+            std::cout << std::left << std::setw(90) << it->first
                       << std::left << std::setw(12) << it->second << std::endl;
         }
     }
