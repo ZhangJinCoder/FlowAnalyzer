@@ -41,14 +41,36 @@ enum LogLevel {
 
 // 日志级别名称
 const std::string LogLevelNames[] = {
+#if 0
     "TRACE",    // 跟踪信息
     "DEBUG",    // 调试信息
-    "INFO*",    // 普通信息
-    "WARN*",    // 告警信息
+    "INFO_",    // 普通信息
+    "WARN_",    // 告警信息
     "ERROR",    // 错误信息
     "FATAL",    // 严重错误
     "CLOSE",    // 关闭日志
+#else 
+    "trace",    // 跟踪信息
+    "debug",    // 调试信息
+    "info·",    // 普通信息
+    "warn·",    // 告警信息
+    "error",    // 错误信息
+    "fatal",    // 严重错误
+    "close",    // 关闭日志
+#endif 
 };
+
+// 日志级别颜色
+const std::string LogLevelColors[] = {
+    "\033[0;37m",  // 白色
+    "\033[0;36m",  // 青色
+    "\033[0;32m",  // 绿色
+    "\033[0;33m",  // 黄色
+    "\033[0;31m",  // 红色
+    "\033[0;35m",  // 紫色
+};  
+// 日志级别颜色重置
+const std::string LogLevelReset = "\033[0m";
 
 // 日志内容结构体
 struct LogMessage {

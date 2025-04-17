@@ -162,17 +162,21 @@ void Logger::writeLog(LogLevel level, const std::string date, const std::string&
             WriteFile(logFileHandle, logMessage.c_str(), logMessage.length(), &bytesWritten, NULL);  
         }
     }
+    if (outputToTerminal) {     // 输出到终端
+        if(level < LV_CLOSE) std::cout << "[" << date << "] [" << LogLevelNames[level] << "] " << message << std::endl;
+        else std::cout << "[" << date << "] " << message << std::endl;
+    }
 #else
     if (logfp.is_open()) {      // 输出到文件
         if(level < LV_CLOSE) logfp << "[" << date << "] [" << LogLevelNames[level] << "] " << message << std::endl;
         else logfp << "[" << date << "] " << message << std::endl;
         logfp.flush();
     }
-#endif 
     if (outputToTerminal) {     // 输出到终端
-        if(level < LV_CLOSE) std::cout << "[" << date << "] [" << LogLevelNames[level] << "] " << message << std::endl;
+        if(level < LV_CLOSE) std::cout << "[" << date << "] [" << LogLevelColors[level] << LogLevelNames[level] << LogLevelReset << "] " << message << std::endl;
         else std::cout << "[" << date << "] " << message << std::endl;
     }
+#endif 
 }
 void Logger::addLogQueue(LogLevel level, const std::string& message) // 添加到日志队列中
 {
